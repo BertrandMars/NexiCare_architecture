@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NexiCare — Architecture Fonctionnelle & Roadmap</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#1A3C6E;--teal:#0E7C7B;--orange:#E07B39;--dark:#0F1623;
+  --mvp-acc:#3B82F6;--mvp-light:#EFF6FF;--mvp-text:#0C447C;--mvp-icon:#DBEAFE;
+  --v1-acc:#10B981;--v1-light:#ECFDF5;--v1-text:#065F46;--v1-icon:#D1FAE5;
+  --v2-acc:#F59E0B;--v2-light:#FFFBEB;--v2-text:#92400E;--v2-icon:#FEF3C7;
+  --v3-acc:#A855F7;--v3-light:#FAF5FF;--v3-text:#6B21A8;--v3-icon:#F3E8FF;
+  --ia-bg:#D1FAE5;--ia-txt:#065F46;
+  --auto-bg:#FEF3C7;--auto-txt:#92400E;
+  --std-bg:#F3F4F6;--std-txt:#374151;
+  --fut-bg:#EDE9FE;--fut-txt:#6D28D9;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:#F8F9FC;color:var(--dark);min-height:100vh;}
+
+.header{background:var(--navy);padding:48px 60px 40px;position:relative;overflow:hidden;}
+.header::before{content:'';position:absolute;top:-80px;right:-80px;width:360px;height:360px;border-radius:50%;background:rgba(14,124,123,.18);}
+.header::after{content:'';position:absolute;bottom:-40px;left:200px;width:200px;height:200px;border-radius:50%;background:rgba(224,123,57,.1);}
+.hinner{position:relative;z-index:2;max-width:1200px;margin:0 auto;}
+.htag{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:100px;padding:5px 16px;font-size:11px;font-weight:500;color:rgba(255,255,255,.6);letter-spacing:.1em;text-transform:uppercase;margin-bottom:24px;}
+.hdot{width:7px;height:7px;border-radius:50%;background:#10B981;}
+.htitle{font-family:'Syne',sans-serif;font-size:clamp(28px,4vw,50px);font-weight:800;color:#fff;line-height:1.05;margin-bottom:14px;}
+.htitle span{color:var(--orange);}
+.hsub{font-size:15px;color:rgba(255,255,255,.5);font-weight:300;max-width:520px;line-height:1.7;margin-bottom:36px;}
+.hmeta{display:flex;gap:32px;flex-wrap:wrap;}
+.mitem{display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,.5);}
+.mnum{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#fff;}
+
+.legbar{background:#fff;border-bottom:1px solid #E5E7EB;padding:14px 60px;}
+.leginner{max-width:1200px;margin:0 auto;width:100%;display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+.leg{display:flex;align-items:center;gap:7px;font-size:12px;color:#6B7280;}
+.chip{font-size:10px;font-weight:500;padding:2px 9px;border-radius:20px;}
+.chip.ia{background:var(--ia-bg);color:var(--ia-txt);}
+.chip.auto{background:var(--auto-bg);color:var(--auto-txt);}
+.chip.std{background:var(--std-bg);color:var(--std-txt);}
+.chip.fut{background:var(--fut-bg);color:var(--fut-txt);}
+.lsep{width:1px;height:16px;background:#E5E7EB;}
+
+.main{padding:0;max-width:100%;}
+
+.phase{margin-bottom:0;opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease;padding:52px 60px 56px;}
+.phase.visible{opacity:1;transform:translateY(0);}
+.phase-inner{max-width:1200px;margin:0 auto;}
+.phase-mvp{background:#EFF6FF;}
+.phase-v1{background:#ECFDF5;}
+.phase-v2{background:#FFFBEB;}
+.phase-v3{background:#FAF5FF;}
+
+.phead{display:flex;align-items:flex-start;gap:16px;margin-bottom:24px;padding-bottom:18px;border-bottom:2px solid;}
+.ppill{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:6px 18px;border-radius:100px;white-space:nowrap;margin-top:3px;}
+.pname{font-family:'Syne',sans-serif;font-size:19px;font-weight:700;margin-bottom:4px;}
+.pdesc{font-size:12px;color:#9CA3AF;font-weight:300;}
+.ptime{font-size:12px;color:#9CA3AF;font-weight:300;margin-left:auto;white-space:nowrap;margin-top:4px;}
+
+.phase-mvp .phead{border-color:var(--mvp-acc);}
+.phase-mvp .ppill{background:var(--mvp-light);color:var(--mvp-text);}
+.phase-mvp .pname{color:var(--navy);}
+.phase-v1 .phead{border-color:var(--v1-acc);}
+.phase-v1 .ppill{background:var(--v1-light);color:var(--v1-text);}
+.phase-v1 .pname{color:#065F46;}
+.phase-v2 .phead{border-color:var(--v2-acc);}
+.phase-v2 .ppill{background:var(--v2-light);color:var(--v2-text);}
+.phase-v2 .pname{color:#92400E;}
+.phase-v3 .phead{border-color:var(--v3-acc);}
+.phase-v3 .ppill{background:var(--v3-light);color:var(--v3-text);}
+.phase-v3 .pname{color:#6B21A8;}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;}
+
+.card{background:#fff;border:1px solid rgba(0,0,0,.07);border-radius:14px;overflow:hidden;transition:transform .2s,box-shadow .2s;box-shadow:0 2px 8px rgba(0,0,0,.05);}
+.card:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,0,.12);}
+.card.new{border:1.5px solid var(--v1-acc);}
+.cacc{height:4px;}
+.ctop{padding:18px 18px 14px;display:flex;gap:13px;align-items:flex-start;}
+.cicon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.cname{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#111827;margin-bottom:4px;line-height:1.3;}
+.cdesc{font-size:12px;color:#9CA3AF;line-height:1.55;}
+.cfeats{padding:12px 18px 16px;border-top:1px solid #F3F4F6;display:flex;flex-wrap:wrap;gap:5px;}
+.feat{font-size:10px;font-weight:500;padding:3px 9px;border-radius:20px;}
+.feat.ia{background:var(--ia-bg);color:var(--ia-txt);}
+.feat.auto{background:var(--auto-bg);color:var(--auto-txt);}
+.feat.std{background:var(--std-bg);color:var(--std-txt);}
+.feat.fut{background:var(--fut-bg);color:var(--fut-txt);font-style:italic;}
+
+.footer{background:var(--navy);padding:22px 60px;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:rgba(255,255,255,.3);flex-wrap:wrap;gap:12px;}
+
+@media(max-width:768px){
+  .header,.legbar,.footer,.phase{padding-left:22px;padding-right:22px;}
+  .grid{grid-template-columns:1fr;}
+  .ptime{display:none;}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="hinner">
+    <div class="htag"><div class="hdot"></div>NexiCare — Stream Health</div>
+    <h1 class="htitle">Architecture fonctionnelle<br><span>& Roadmap produit</span></h1>
+    <p class="hsub">Vision exhaustive des 16 modules NexiCare, organisés par phase de développement — avec les automatisations et fonctionnalités IA intégrées à chaque étape.</p>
+    <div class="hmeta">
+      <div class="mitem"><div class="mnum">16</div><div>modules<br>au total</div></div>
+      <div class="mitem"><div class="mnum">4</div><div>phases<br>de livraison</div></div>
+      <div class="mitem"><div class="mnum">60</div><div>mois<br>de roadmap</div></div>
+      <div class="mitem"><div class="mnum">40 000</div><div>structures<br>adressables</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="legbar">
+  <div class="leginner">
+    <span style="font-size:12px;color:#9CA3AF;font-weight:500;margin-right:4px;">Badges :</span>
+    <div class="leg"><span class="chip std">Fonctionnalité standard</span> Logique métier native</div>
+    <div class="lsep"></div>
+    <div class="leg"><span class="chip auto">Automatisation</span> Déterministe, sans ML</div>
+    <div class="lsep"></div>
+    <div class="leg"><span class="chip ia">IA intégrée</span> LLM, ML ou scoring</div>
+    <div class="lsep"></div>
+    <div class="leg"><span class="chip fut">Phase suivante</span> Prévu en roadmap</div>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- ══ MVP ══════════════════════════════════════════════════════ -->
+<div class="phase phase-mvp"><div class="phase-inner">
+  <div class="phead">
+    <div class="ppill">MVP</div>
+    <div>
+      <div class="pname">Socle organisationnel</div>
+      <div class="pdesc">5 modules · Co-construction partenaires pilotes · Accès gratuit partenaires fondateurs</div>
+    </div>
+    <div class="ptime">M1 → M8 · 2026–2027</div>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="cacc" style="background:var(--mvp-acc)"></div>
+      <div class="ctop">
+        <div class="cicon" style="background:var(--mvp-icon)">⚡</div>
+        <div><div class="cname">Poste de commande</div><div class="cdesc">Tableau de bord unifié · Alertes temps réel · Backlog d'actions · KPIs direction</div></div>
+      </div>
+      <div class="cfeats">
+        <span class="feat std">Alertes urgence triées</span>
+        <span class="feat std">KPIs temps réel</span>
+        <span class="feat std">Backlog partagé équipe</span>
+        <span class="feat std">Vues Direction / Terrain / Qualité</span>
+        <span class="feat auto">Règles automatiques configurables</span>
+        <span class="feat auto">Score composite activité</span>
+        <span class="feat fut">Briefing IA hebdo → V1</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="cacc" style="background:var(--mvp-acc)"></div>
+      <div class="ctop">
+        <div class="cicon" style="background:var(--mvp-icon)">📋</div>
+        <div><div class="cname">Parcours & Admissions</div><div class="cdesc">Pipeline Kanban · Matching profil/place · Contrat électronique · Devis famille</div></div>
+      </div>
+      <div class="cfeats">
+        <span class="feat std">Pipeline Kanban complet</span>
+        <span class="feat std">Import ViaTrajectoire</span>
+        <span class="feat std">Liste d'attente priorisée</span>
+        <span class="feat std">Signature électronique</span>
+        <span class="feat std">Devis famille APL / APA / ASE</span>
+        <span class="feat auto">Génération contrat PDF</span>
+        <span class="feat auto">Relances dossiers inactifs</span>
+        <span class="feat ia">Scoring matching profil/place</span>
+        <span class="feat ia">Prévisions activité 14j</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="cacc" style="background:var(--mvp-acc)"></div>
+      <div class="ctop">
+        <div class="cicon" style="background:var(--mvp-icon)">🤝</div>
+        <div><div class="cname">Partenaires & Territoire</div><div class="cdesc">CRM sectoriel · Pipeline partenariale · Cartographie · Opportunités stratégiques</div></div>
+      </div>
+      <div class="cfeats">
+        <span class="feat std">CRM partenaires FINESS</span>
+        <span class="feat std">Pipeline 4 étapes</span>
+        <span class="feat std">Conventions + signature</span>
+        <span class="feat std">Opportunités ARS / extension / reprise</span>
+        <span class="feat std">Cartographie territoriale</span>
+        <span class="feat auto">Bilan mensuel partenaire auto</span>
+        <span class="feat auto">Rappels relance configurables</span>
+        <span class="feat ia">Génération convention LLM</span>
+        <span class="feat fut">Scoring décrochage → V1</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="cacc" style="background:var(--mvp-acc)"></div>
+      <div class="ctop">
+        <div class="cicon" style="background:var(--mvp-icon)">👨‍👩‍👧</div>
+        <div><div class="cname">Familles & Aidants</div><div class="cdesc">Journal échanges · Documents · Messagerie sécurisée · Satisfaction</div></div>
+      </div>
+      <div class="cfeats">
+        <span class="feat std">Journal échanges horodaté</span>
+        <span class="feat std">Messagerie sécurisée chiffrée</span>
+        <span class="feat std">Documents & signature</span>
+        <span class="feat std">Enquêtes satisfaction</span>
+        <span class="feat std">Traduction 15+ langues (DeepL)</span>
+        <span class="feat auto">Relances documents en attente</span>
+        <span class="feat auto">Satisfaction auto sur événements</span>
+        <span class="feat ia">Rédaction assistée LLM</span>
+        <span class="feat ia">Génération réponse réclamation</span>
+        <span class="feat fut">Portail famille accès direct → V2</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="cacc" style="background:var(--mvp-acc)"></div>
+      <div class="ctop">
+        <div class="cicon" style="background:var(--mvp-icon)">📊</div>
+        <div><div class="cname">Pilotage & Indicateurs</div><div class="cdesc">TDB ANAP/ARS · Multi-sites · Reporting automatisé · Alertes dérive</div></div>
+      </div>
+      <div class="cfeats">
+        <span class="feat std">TDB direction temps réel</span>
+        <span class="feat std">Indicateurs ANAP / ARS</span>
+        <span class="feat std">Vue consolidée multi-sites</span>
+        <span class="feat std">Lien rapport partageable sécurisé</span>
+        <span class="feat auto">Calcul ANAP automatique</span>
+        <span class="feat auto">Rapport PDF planifié</span>
+        <span class="feat auto">Alertes dérive sur seuils</span>
+        <span class="feat fut">Briefing IA hebdo → V1</span>
+        <span class="feat fut">Projections 3 mois → V1</span>
+      </div>
+    </div>
+
+
+
+  </div></div>
+</div>
+
+<!-- ══ V1 ════════════════════════════════════════════════════════ -->
+<div class="phase phase-v1"><div class="phase-inner">
+  <div class="phead">
+    <div class="ppill">Version 1</div>
+    <div>
+      <div class="pname">Qualité, Enrichissement & IA de 2e génération</div>
+      <div class="pdesc">4 modules · Consolidation retours pilotes · Premiers abonnements commerciaux</div>
+    </div>
+    <div class="ptime">M9 → M18 · 2027</div>
+  </div>
+  <div class="grid">
+
+    <div class="card new">
+      <div class="cacc" style="background:var(--v1-acc)"></div>
+      <div class="ctop">
+        <div class="cicon" style="background:var(--v1-icon)">✅</div>
+        <div><div class="cname">Qualité, Risques & Conformité HAS</div><div class="cdesc">18 critères HAS · EI mobile · Registres · Export preuves · Plan d'amélioration</div></div>
+      </div>
+      <div class="cfeats">
+        <span class="feat std">18 registres HAS (plaintes, EI, RGPD, crise…)</span>
+        <span class="feat std">Déclaration EI mobile en 2 min</span>
+        <span class="feat std">Plan d'action correctif</span>
+        <span class="feat std">Non-conformités & amélioration continue</span>
+        <span class="feat std">Couverture HAS temps réel (vert/orange/rouge)</span>
+        <span class="feat auto">Génération dossier preuves HAS PDF</span>
+        <span class="feat auto">Plan action auto depuis type EI</span>
+        <span class="feat ia">Saisie vocale EI (Whisper)</span>
+        <span class="feat ia">Vérification conformité docs LLM</span>
+        <span class="feat fut">Anticipation EI 14j → V2</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="cacc" style="background:var(--v1-acc)"></div>
+      <div class="ctop">
+        <div class="cicon" style="background:var(--v1-icon)">🎨</div>
+        <div><div class="cname">Vie Sociale & Animations</div><div class="cdesc">Planning partagé · Présences mobile · Notifs familles · Indicateurs HAS</div></div>
+      </div>
+      <div class="cfeats">
+        <span class="feat std">Planning semaine / mois partagé</span>
+        <span class="feat std">Présences mobile offline</span>
+        <span class="feat std">Profil animation bénéficiaire</span>
+        <span class="feat std">Export indicateurs vie sociale HAS</span>
+        <span class="feat auto">Notifications familles auto</span>
+        <span class="feat auto">Rapport mensuel animations</span>
+        <span class="feat ia">Recommandation activités (profil)</span>
+        <span class="feat ia">Alerte absence inhabituelle</span>
+        <span class="feat fut">Stimulations cognitives → V2</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="cacc" style="background:var(--v1-acc)"></div>
+      <div class="ctop">
+        <div class="cicon" style="background:var(--v1-icon)">🔗</div>
+        <div><div class="cname">Interopérabilité & Connecteurs</div><div class="cdesc">Lecture DPI · NetSoins · Ogust · Enrichissement pilotage</div></div>
+      </div>
+      <div class="cfeats">
+        <span class="feat std">Connecteur NetSoins (lecture)</span>
+        <span class="feat std">Connecteur Ogust (lecture)</span>
+        <span class="feat std">Webhooks entrants configurables</span>
+        <span class="feat std">Enrichissement TDB pilotage</span>
+        <span class="feat auto">Synchronisation automatique</span>
+        <span class="feat auto">Alertes si données manquantes</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="cacc" style="background:var(--v1-acc)"></div>
+      <div class="ctop">
+        <div class="cicon" style="background:var(--v1-icon)">🏢</div>
+        <div><div class="cname">Module Groupes avancé</div><div class="cdesc">Consolidation multi-sites · Benchmark interne · Reporting groupe · Alertes dérive</div></div>
+      </div>
+      <div class="cfeats">
+        <span class="feat std">TDB consolidé groupe</span>
+        <span class="feat std">Benchmark inter-établissements</span>
+        <span class="feat std">Reporting groupe PDF</span>
+        <span class="feat std">Alertes dérive par site</span>
+        <span class="feat auto">Rapport groupe planifié</span>
+        <span class="feat ia">Score fragilité organisationnelle</span>
+        <span class="feat ia">Projections activité 3 mois</span>
+        <span class="feat ia">Briefing direction IA hebdo</span>
+      </div>
+    </div>
+
+  </div></div>
+</div>
+
+<!-- ══ V2 ════════════════════════════════════════════════════════ -->
+<div class="phase phase-v2"><div class="phase-inner">
+  <div class="phead">
+    <div class="ppill">Version 2</div>
+    <div>
+      <div class="pname">Extension administrative, financière & IA prédictive</div>
+      <div class="pdesc">4 modules · Facturation · GED · Stimulations cognitives · Portail famille</div>
+    </div>
+    <div class="ptime">M19 → M30 · 2028</div>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="cacc" style="background:var(--v2-acc)"></div>
+      <div class="ctop">
+        <div class="cicon" style="background:var(--v2-icon)">💰</div>
+        <div><div class="cname">Facturation & Comptabilité</div><div class="cdesc">Facturation EHPAD/SAD · Aides publiques · Exports comptables · CNSA</div></div>
+      </div>
+      <div class="cfeats">
+        <span class="feat std">Facturation mensuelle résidents</span>
+        <span class="feat std">Calcul APL / APA / Aide sociale hébergement</span>
+        <span class="feat std">Lien CNSA & Conseils Départementaux</span>
+        <span class="feat std">Exports comptables (ERP)</span>
+        <span class="feat auto">Génération factures automatique</span>
+        <span class="feat auto">Relances impayés</span>
+        <span class="feat auto">TDB financier direction</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="cacc" style="background:var(--v2-acc)"></div>
+      <div class="ctop">
+        <div class="cicon" style="background:var(--v2-icon)">📁</div>
+        <div><div class="cname">Archivage documentaire (GED)</div><div class="cdesc">GED réglementaire · Classement auto · Recherche full-text · Versioning 5 ans</div></div>
+      </div>
+      <div class="cfeats">
+        <span class="feat std">GED administrative complète</span>
+        <span class="feat std">Versioning documents</span>
+        <span class="feat std">Recherche full-text</span>
+        <span class="feat std">Archivage réglementaire 5 ans minimum</span>
+        <span class="feat auto">Classement automatique documents</span>
+        <span class="feat ia">Classement intelligent LLM</span>
+        <span class="feat ia">Vérification conformité LLM</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="cacc" style="background:var(--v2-acc)"></div>
+      <div class="ctop">
+        <div class="cicon" style="background:var(--v2-icon)">🧩</div>
+        <div><div class="cname">Stimulations cognitives</div><div class="cdesc">Exercices personnalisés · Suivi progression · Interface tablette · Rapport famille</div></div>
+      </div>
+      <div class="cfeats">
+        <span class="feat std">Bibliothèque exercices structurée</span>
+        <span class="feat std">Suivi individuel bénéficiaire</span>
+        <span class="feat std">Interface tablette simplifiée</span>
+        <span class="feat std">Rapport progression famille</span>
+        <span class="feat ia">Adaptation niveau exercices</span>
+        <span class="feat ia">Génération exercices LLM</span>
+        <span class="feat ia">Détection dégradation cognitive</span>
+        <span class="feat ia">Anticipation EI à 14j (ML)</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="cacc" style="background:var(--v2-acc)"></div>
+      <div class="ctop">
+        <div class="cicon" style="background:var(--v2-icon)">🏠</div>
+        <div><div class="cname">Portail Famille</div><div class="cdesc">App isolée · Messagerie sécurisée · Documents · Satisfaction · Traduction — Accès direct familles</div></div>
+      </div>
+      <div class="cfeats">
+        <span class="feat std">Espace famille dédié (sous-domaine isolé)</span>
+        <span class="feat std">Messagerie sécurisée chiffrée</span>
+        <span class="feat std">Documents & signature élec.</span>
+        <span class="feat std">Programme animations & événements</span>
+        <span class="feat std">Réclamation formalisée en ligne</span>
+        <span class="feat auto">Invitation auto à l'admission</span>
+        <span class="feat auto">Notification push / email / SMS</span>
+        <span class="feat ia">Résumé mensuel activité LLM</span>
+        <span class="feat ia">Rédaction réponses équipe LLM</span>
+        <span class="feat ia">Traduction interface 15+ langues</span>
+      </div>
+    </div>
+
+
+  </div></div>
+</div>
+
+<!-- ══ V3 ════════════════════════════════════════════════════════ -->
+<div class="phase phase-v3"><div class="phase-inner">
+  <div class="phead">
+    <div class="ppill">Version 3</div>
+    <div>
+      <div class="pname">Plateforme tout-en-un — SIRH, RH & IA avancée</div>
+      <div class="pdesc">5 modules · Gestion complète des ressources humaines · IA prédictive avancée</div>
+    </div>
+    <div class="ptime">M31 → M60 · 2028–2031</div>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="cacc" style="background:var(--v3-acc)"></div>
+      <div class="ctop">
+        <div class="cicon" style="background:var(--v3-icon)">👥</div>
+        <div><div class="cname">SIRH & Gestion du personnel</div><div class="cdesc">Dossier salarié · Absences · Habilitations · Entretiens annuels</div></div>
+      </div>
+      <div class="cfeats">
+        <span class="feat std">Dossier salarié complet</span>
+        <span class="feat std">Gestion absences & congés</span>
+        <span class="feat std">Habilitations & certifications</span>
+        <span class="feat std">Entretiens annuels</span>
+        <span class="feat auto">Alertes renouvellements</span>
+        <span class="feat ia">Génération CR entretien LLM</span>
+        <span class="feat ia">Détection risque burn-out</span>
+        <span class="feat ia">Prédiction absentéisme (ML)</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="cacc" style="background:var(--v3-acc)"></div>
+      <div class="ctop">
+        <div class="cicon" style="background:var(--v3-icon)">📅</div>
+        <div><div class="cname">Planification des équipes</div><div class="cdesc">Planning terrain · CCN · Modulation · Remplacements · Alertes légales</div></div>
+      </div>
+      <div class="cfeats">
+        <span class="feat std">Planning équipes (semaine/mois)</span>
+        <span class="feat std">Contraintes CCN encodées</span>
+        <span class="feat std">Modulation temps de travail</span>
+        <span class="feat std">Alertes légales automatiques</span>
+        <span class="feat ia">Optimisation planning IA</span>
+        <span class="feat ia">Suggestions remplacements</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="cacc" style="background:var(--v3-acc)"></div>
+      <div class="ctop">
+        <div class="cicon" style="background:var(--v3-icon)">🎯</div>
+        <div><div class="cname">Recrutement assisté</div><div class="cdesc">Annonces · Sourcing · Matching CV · Pipeline candidats Kanban</div></div>
+      </div>
+      <div class="cfeats">
+        <span class="feat std">Pipeline candidats Kanban</span>
+        <span class="feat std">Publication multi-canaux</span>
+        <span class="feat std">Centralisation candidatures</span>
+        <span class="feat auto">Génération annonce auto</span>
+        <span class="feat ia">Matching CV / poste (embeddings)</span>
+        <span class="feat ia">Synthèse candidat LLM</span>
+        <span class="feat ia">Questions entretien LLM</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="cacc" style="background:var(--v3-acc)"></div>
+      <div class="ctop">
+        <div class="cicon" style="background:var(--v3-icon)">🎓</div>
+        <div><div class="cname">Gestion des formations</div><div class="cdesc">Plan de formation · Certifications · Recyclages obligatoires · Suivi</div></div>
+      </div>
+      <div class="cfeats">
+        <span class="feat std">Plan de formation annuel</span>
+        <span class="feat std">Suivi certifications individuelles</span>
+        <span class="feat std">Alertes recyclages obligatoires</span>
+        <span class="feat auto">Rappels échéances</span>
+        <span class="feat auto">Rapport bilan formation</span>
+        <span class="feat ia">Recommandations formations LLM</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="cacc" style="background:var(--v3-acc)"></div>
+      <div class="ctop">
+        <div class="cicon" style="background:var(--v3-icon)">🤖</div>
+        <div><div class="cname">IA & Prédictif avancé</div><div class="cdesc">Assistant décisionnel · Simulation · Ciblage populations · Benchmark</div></div>
+      </div>
+      <div class="cfeats">
+        <span class="feat ia">Ciblage populations à risque (ML)</span>
+        <span class="feat ia">Simulation What-if</span>
+        <span class="feat ia">Score fragilité bénéficiaire (ML)</span>
+        <span class="feat ia">Personnalisation prises en charge</span>
+        <span class="feat ia">Assistant décisionnel direction</span>
+        <span class="feat ia">Benchmark inter-structures anonymisé</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div>
+
+<div class="footer">
+  <span>NexiCare — Stream Health · Architecture fonctionnelle v2.0</span>
+  <span>Confidentiel · Non contractuel · 2026</span>
+</div>
+
+<script>
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(e.isIntersecting){ e.target.classList.add('visible'); obs.unobserve(e.target); }
+  });
+}, { threshold: 0.05 });
+document.querySelectorAll('.phase').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
